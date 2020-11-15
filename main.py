@@ -5,10 +5,17 @@ import sys
 from time import sleep
 from re import findall
 from subprocess import check_output
-
+from datetime import datetime
 
 ARDUINO_DEV_PATH = "/dev/ttyUSB0"
 ARDUINO_BAND_SPEED = 9600
+
+
+def is_night_mode() -> bool:
+    hour = datetime.now().time().hour
+    if hour >= 22 or hour < 8:
+      return True
+    return False
 
 
 def get_temp() -> int:
@@ -24,8 +31,8 @@ def form_send_string() -> str:
     gpu_load = 0
     ram_use = int(psutil.virtual_memory().percent)
     gpu_memory_use = 0
-
-    result = f"{cpu_temp};{gpu_temp};0;0;{cpu_load};{gpu_load};{ram_use};{gpu_memory_use};E"
+    night_mode = 100 if is_night_mode() else 0
+    result = f"{cpu_temp};{gpu_temp};{night_mode};0;{cpu_load};{gpu_load};{ram_use};{gpu_memory_use};E"
     return result
 
 

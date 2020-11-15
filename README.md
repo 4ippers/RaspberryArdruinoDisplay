@@ -6,6 +6,7 @@ It's Python3 script for grep info from raspberry pi system (raspbian) and send i
 
 ## Algo
 1) Grep info from system about: CPU temp and load, Ram used memory
+2) Grep current time for night mode. If night mode is on - disable backlight on Arduino display.
 2) Send it to Arduino with specific format (See below)
 3) Arduino send it to display LCD 1604
 
@@ -15,7 +16,7 @@ It's Python3 script for grep info from raspberry pi system (raspbian) and send i
 ```
 0 - CPU TEMP
 1 - GPU TEMP
-2 - 0 (Reserved)
+2 - NigtMode (100 - is enabled and off display backlight)
 3 - 0 (Reserved)
 4 - CPU LOAD
 5 - GPU LOAD
