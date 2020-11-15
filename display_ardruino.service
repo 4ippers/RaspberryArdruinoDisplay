@@ -1,0 +1,15 @@
+[Unit]
+Description=Ardruino Display
+After=syslog.target
+After=network.target
+#After=systemd-user-sessions.service
+
+[Service]
+Restart=always
+RestartSec=60
+# You path there
+ExecStart=/home/path/to/script
+
+[Install]
+WantedBy=multi-user.target
+

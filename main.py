@@ -1,17 +1,19 @@
 import os
 import serial
 import psutil
+import sys
 from time import sleep
 from re import findall
 from subprocess import check_output
+
 
 ARDUINO_DEV_PATH = "/dev/ttyUSB0"
 ARDUINO_BAND_SPEED = 9600
 
 
 def get_temp() -> int:
-    temp = check_output(["vcgencmd","measure_temp"]).decode()
-    temp = float(findall('\d+\.\d+', temp)[0])
+    temp = check_output(["vcgencmd","measure_temp"]).decode()    # Выполняем запрос температуры
+    temp = float(findall('\d+\.\d+', temp)[0])                   # Извлекаем при помощи регулярного выражения значение температуры из строки "temp=47.8'C"
     return int(temp)
 
 
@@ -29,12 +31,14 @@ def form_send_string() -> str:
 
 class ArduinoStatsDisplay:
     RECONNECT_TIMEOUT = 5
+    RECONNECT_ATTEMP = 3
 
     def __init__(self, dev_path, band_speed):
         self.dev_path = dev_path
         self.band_speed = band_speed
         self.serial = None
         self.connect_to_arduino()
+        self.reconnect_attemps = self.RECONNECT_ATTEMP
 
     def connect_to_arduino(self):
         if self.serial is not None and self.serial.is_open:
@@ -44,16 +48,21 @@ class ArduinoStatsDisplay:
         try:
             self.serial = serial.Serial(self.dev_path, self.band_speed)
             print("Successfully connected")
+            self.reconnect_attemps = self.RECONNECT_ATTEMP
         except Exception as e:
-            print(f"Can't connect to Ardruino. Error: {e}. Retry after: {self.RECONNECT_TIMEOUT} seconds")
+            #print(f"Can't connect to Ardruino. Error: {e}. Retry after: {self.RECONNECT_TIMEOUT} seconds")
             sleep(self.RECONNECT_TIMEOUT)
-            self.connect_to_arduino()
+            if (self.reconnect_attemps > 0):
+              self.reconnect_attemps -= 1
+              self.connect_to_arduino()
+            else:
+              sys.exit(1)
 
     def send_to_arduino(self, msg: bytes):
         try:
             self.serial.write(msg)
         except Exception as e:
-            print(f"Can't send msg to arduino: Error: {e}. Close connection and retry")
+            #print(f"Can't send msg to arduino: Error: {e}. Close connection and retry")
             self.close()
             self.connect_to_arduino()
             sleep(self.RECONNECT_TIMEOUT)
